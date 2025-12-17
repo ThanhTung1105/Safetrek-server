@@ -6,15 +6,6 @@ use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\TripController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes (Mobile Flutter App)
-|--------------------------------------------------------------------------
-|
-| These routes return JSON responses for the Flutter mobile application.
-| All routes use Laravel Sanctum for API authentication.
-|
-*/
 
 // Public routes (No authentication required)
 Route::post('/register', [AuthController::class, 'register']);
@@ -33,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('trips')->group(function () {
         Route::post('/start', [TripController::class, 'startTrip']);
         Route::post('/update-location', [TripController::class, 'updateLocation']);
-        Route::post('/end', [TripController::class, 'endTrip']); // 🔐 DURESS PIN LOGIC
+        Route::post('/end', [TripController::class, 'endTrip']); 
         Route::post('/cancel', [TripController::class, 'cancelTrip']);
         Route::get('/active', [TripController::class, 'getActiveTrip']);
         Route::get('/history', [TripController::class, 'getTripHistory']);

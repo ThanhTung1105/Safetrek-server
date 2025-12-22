@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SendDuressAlertJob;
+use App\Jobs\SendPanicAlertJob;
 use App\Models\LocationHistory;
 use App\Models\Trip;
 use Illuminate\Http\Request;
@@ -18,11 +19,23 @@ class TripController extends Controller
     {
         $request->validate([
             'destination_name' => 'nullable|string|max:255',
-            'duration_minutes' => 'required|integer|min:1',
-            'trip_type' => 'required|in:timer,panic,duress',
+            'duration_minutes' => 'required|integer|min:1|max:1440', // Max 24 hours
         ]);
 
         $user = $request->user();
+
+        // Check if user already has an active trip
+        $activeTrip = Trip::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        if ($activeTrip) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already have an active trip. Please end it first.',
+                'data' => $activeTrip,
+            ], 400);
+        }
 
         // Calculate expected end time
         $startTime = now();
@@ -34,13 +47,62 @@ class TripController extends Controller
             'start_time' => $startTime,
             'expected_end_time' => $expectedEndTime,
             'status' => 'active',
-            'trip_type' => $request->trip_type,
+            'trip_type' => 'timer',
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Trip started successfully',
-            'data' => $trip,
+            'data' => [
+                'trip' => $trip,
+                'time_remaining_minutes' => $request->duration_minutes,
+            ],
+        ], 201);
+    }
+
+    /**
+     * PANIC BUTTON - Immediate emergency alert
+     * No trip_id needed, creates a new panic trip instantly
+     */
+    public function panicButton(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'battery_level' => 'nullable|integer|between:0,100',
+        ]);
+
+        $user = $request->user();
+
+        // Create a panic trip immediately
+        $trip = Trip::create([
+            'user_id' => $user->id,
+            'destination_name' => 'PANIC BUTTON ACTIVATED',
+            'start_time' => now(),
+            'expected_end_time' => now()->addHour(), // 1 hour window
+            'status' => 'panic',
+            'trip_type' => 'panic',
+        ]);
+
+        // Save current location
+        LocationHistory::create([
+            'trip_id' => $trip->id,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'battery_level' => $request->battery_level,
+            'timestamp' => now(),
+        ]);
+
+        // Dispatch panic alert job IMMEDIATELY
+        dispatch(new SendPanicAlertJob($trip, $user));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Panic alert sent to your guardians',
+            'data' => [
+                'trip_id' => $trip->id,
+                'alert_sent_at' => now()->toISOString(),
+            ],
         ], 201);
     }
 

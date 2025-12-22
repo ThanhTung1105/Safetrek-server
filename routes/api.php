@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Trip Management
     Route::prefix('trips')->group(function () {
         Route::post('/start', [TripController::class, 'startTrip']);
+        Route::post('/panic', [TripController::class, 'panicButton']); // 🚨 PANIC BUTTON
         Route::post('/update-location', [TripController::class, 'updateLocation']);
         Route::post('/end', [TripController::class, 'endTrip']); // 🔐 DURESS PIN LOGIC
         Route::post('/cancel', [TripController::class, 'cancelTrip']);

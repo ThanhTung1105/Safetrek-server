@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-class SendDuressAlertJob implements ShouldQueue
+class SendPanicAlertJob implements ShouldQueue
 {
     use Queueable;
 
@@ -27,8 +27,8 @@ class SendDuressAlertJob implements ShouldQueue
     /**
      * Execute the job.
      * 
-     * This job is triggered when a user enters their DURESS PIN,
-     * indicating they are under threat. It sends emergency alerts
+     * This job is triggered when a user presses the PANIC BUTTON,
+     * indicating an immediate emergency. It sends instant alerts
      * to all accepted guardians.
      */
     public function handle(): void
@@ -41,11 +41,11 @@ class SendDuressAlertJob implements ShouldQueue
             ->get();
 
         if ($guardians->isEmpty()) {
-            Log::warning("Duress alert: User {$this->user->id} has no accepted guardians");
+            Log::warning("Panic alert: User {$this->user->id} has no accepted guardians");
             return;
         }
 
-        // Get last known location
+        // Get last known location from the trip
         $lastLocation = $this->trip->locationHistory()
             ->orderBy('timestamp', 'desc')
             ->first();
@@ -66,32 +66,34 @@ class SendDuressAlertJob implements ShouldQueue
             'destination' => $this->trip->destination_name,
             'maps_link' => $mapsLink,
             'battery_level' => $batteryLevel,
+            'expected_end_time' => $this->trip->expected_end_time->format('Y-m-d H:i:s'),
         ];
 
-        // Send alerts to all guardians
+        // Send PANIC alerts to all guardians
         foreach ($guardians as $guardian) {
             try {
                 $notificationService->sendEmergencyAlert(
                     recipientName: $guardian->contact_name,
                     recipientPhone: $guardian->contact_phone_number,
-                    recipientEmail: null, // TODO: Add email field to guardians table if needed
-                    alertType: 'duress',
+                    recipientEmail: null,
+                    alertType: 'panic',
                     alertData: $alertData
                 );
 
-                Log::emergency("DURESS ALERT sent to guardian: {$guardian->contact_name} ({$guardian->contact_phone_number})", [
+                Log::emergency("PANIC ALERT sent to guardian: {$guardian->contact_name} ({$guardian->contact_phone_number})", [
                     'user_id' => $this->user->id,
                     'trip_id' => $this->trip->id,
                     'guardian_id' => $guardian->id,
+                    'alert_type' => 'panic',
                 ]);
 
             } catch (\Exception $e) {
-                Log::error("Failed to send duress alert to guardian {$guardian->id}: " . $e->getMessage());
+                Log::error("Failed to send panic alert to guardian {$guardian->id}: " . $e->getMessage());
             }
         }
 
-        // Log the duress event for admin review
-        Log::emergency("DURESS EVENT LOGGED", [
+        // Log the panic event for admin review
+        Log::emergency("PANIC BUTTON ACTIVATED", [
             'user_id' => $this->user->id,
             'user_name' => $this->user->full_name,
             'trip_id' => $this->trip->id,

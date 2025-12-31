@@ -1,1 +1,1 @@
-#trang chủ admin
+#trang chủ admin (Chủ yếu để xem dữ liệu)

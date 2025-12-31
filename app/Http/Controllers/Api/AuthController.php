@@ -97,6 +97,52 @@ class AuthController extends Controller
         ]);
     }
 
+
+
+    /**
+     * Verify a PIN during a trip and return its type (safety or duress)
+     */
+    public function verifyTripPin(Request $request)
+    {
+        $request->validate([
+            'pin' => 'required|string|size:4',
+        ]);
+
+        $user = $request->user();
+
+        // 1. Check if it's the safety PIN
+        if ($user->safety_pin_hash && Hash::check($request->pin, $user->safety_pin_hash)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Xác thực PIN an toàn thành công.',
+                'data' => [
+                    'pin_type' => 'safety' // Trả về loại PIN
+                ]
+            ]);
+        }
+
+        // 2. Check if it's the duress PIN
+        if ($user->duress_pin_hash && Hash::check($request->pin, $user->duress_pin_hash)) {
+            // !! QUAN TRỌNG: Kích hoạt logic gửi cảnh báo khẩn cấp tại đây
+            // Ví dụ: event(new DuressPinEntered($user));
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Xác thực PIN ép buộc thành công.',
+                'data' => [
+                    'pin_type' => 'duress' // Trả về loại PIN
+                ]
+            ]);
+        }
+
+        // 3. If neither PIN matches
+        return response()->json([
+            'success' => false,
+            'message' => 'Mã PIN không đúng.',
+        ], 422);
+    }
+    
+
     /**
      * Logout (revoke token)
      */

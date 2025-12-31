@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/setup-pins', [AuthController::class, 'setupPins']);
+    Route::post('/verify-trip-pin', [AuthController::class, 'verifyTripPin']);
     Route::post('/update-fcm-token', [AuthController::class, 'updateFcmToken']);
     
     // Trip Management

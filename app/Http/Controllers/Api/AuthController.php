@@ -142,6 +142,51 @@ class AuthController extends Controller
         ], 422);
     }
     
+        /**
+     * Update the user's safety PIN
+     */
+    public function updateSafetyPin(Request $request)
+    {
+        $user = $request->user();
+
+        // Validate new safety_pin, ensuring it's different from the current duress_pin
+        $request->validate([
+            'safety_pin' => ['required', 'string', 'size:4', function ($attribute, $value, $fail) use ($user) {
+                if ($user->duress_pin_hash && Hash::check($value, $user->duress_pin_hash)) {
+                    $fail('Mã PIN an toàn phải khác với mã PIN nguy hiểm.');
+                }
+            }],
+        ]);
+
+        $user->update([
+            'safety_pin_hash' => Hash::make($request->safety_pin),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Cập nhật PIN an toàn thành công.']);
+    }
+
+    /**
+     * Update the user's duress PIN
+     */
+    public function updateDuressPin(Request $request)
+    {
+        $user = $request->user();
+
+        // Validate new duress_pin, ensuring it's different from the current safety_pin
+        $request->validate([
+            'duress_pin' => ['required', 'string', 'size:4', function ($attribute, $value, $fail) use ($user) {
+                if ($user->safety_pin_hash && Hash::check($value, $user->safety_pin_hash)) {
+                    $fail('Mã PIN nguy hiểm phải khác với mã PIN an toàn.');
+                }
+            }],
+        ]);
+
+        $user->update([
+            'duress_pin_hash' => Hash::make($request->duress_pin),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Cập nhật PIN nguy hiểm thành công.']);
+    }
 
     /**
      * Logout (revoke token)

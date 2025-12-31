@@ -54,3 +54,5 @@ Route::middleware('auth:sanctum')->group(function () {
     // News & Safety Tips
     Route::get('/news', [NewsController::class, 'index']);
 });
+
+//end

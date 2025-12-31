@@ -28,6 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/setup-pins', [AuthController::class, 'setupPins']);
     Route::post('/verify-trip-pin', [AuthController::class, 'verifyTripPin']);
+    Route::post('/update-safety-pin', [AuthController::class, 'updateSafetyPin']);
+    Route::post('/update-duress-pin', [AuthController::class, 'updateDuressPin']);
     Route::post('/update-fcm-token', [AuthController::class, 'updateFcmToken']);
     
     // Trip Management

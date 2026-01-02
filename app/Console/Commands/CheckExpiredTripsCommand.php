@@ -28,9 +28,10 @@ class CheckExpiredTripsCommand extends Command
      */
     public function handle()
     {
-        // Find all active trips that have expired (expected_end_time has passed)
+        // Find all active trips that have expired MORE THAN 60 SECONDS AGO
+        // This gives the user 60s on the mobile app to enter their PIN and cancel the alert
         $expiredTrips = Trip::where('status', 'active')
-            ->where('expected_end_time', '<=', now())
+            ->where('expected_end_time', '<=', now()->subSeconds(60))
             ->with('user')
             ->get();
 
@@ -43,6 +44,12 @@ class CheckExpiredTripsCommand extends Command
 
         foreach ($expiredTrips as $trip) {
             try {
+                // Update status FIRST to prevent duplicate alerts
+                $trip->update([
+                    'status' => 'alerted',
+                    'actual_end_time' => now(),
+                ]);
+
                 // Dispatch alert job
                 dispatch(new SendTimerExpiredAlertJob($trip, $trip->user));
 

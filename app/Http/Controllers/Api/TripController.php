@@ -63,16 +63,33 @@ class TripController extends Controller
     /**
      * PANIC BUTTON - Immediate emergency alert
      * No trip_id needed, creates a new panic trip instantly
+     * Location is OPTIONAL - supports panic from home screen (no location) or trip screen (with location)
      */
     public function panicButton(Request $request)
     {
         $request->validate([
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'battery_level' => 'nullable|integer|between:0,100',
         ]);
 
         $user = $request->user();
+
+        // End any active trips before creating panic trip
+        try {
+            Trip::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->update([
+                    'status' => 'completed', // Mark as completed (cancelled not in ENUM)
+                    'actual_end_time' => now(),
+                ]);
+        } catch (\Exception $e) {
+            // Log but don't fail - panic is more important
+            \Log::warning('Failed to auto-cancel active trips during panic', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         // Create a panic trip immediately
         $trip = Trip::create([
@@ -84,14 +101,16 @@ class TripController extends Controller
             'trip_type' => 'panic',
         ]);
 
-        // Save current location
-        LocationHistory::create([
-            'trip_id' => $trip->id,
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude,
-            'battery_level' => $request->battery_level,
-            'timestamp' => now(),
-        ]);
+        // Save current location (if provided)
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            LocationHistory::create([
+                'trip_id' => $trip->id,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'battery_level' => $request->battery_level,
+                'timestamp' => now(),
+            ]);
+        }
 
         // Dispatch panic alert job IMMEDIATELY
         dispatch(new SendPanicAlertJob($trip, $user));
@@ -154,6 +173,9 @@ class TripController extends Controller
         $request->validate([
             'trip_id' => 'required|exists:trips,id',
             'pin_code' => 'required|string|size:4',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'battery_level' => 'nullable|integer|between:0,100',
         ]);
 
         $user = $request->user();
@@ -188,6 +210,17 @@ class TripController extends Controller
         } elseif (Hash::check($request->pin_code, $user->duress_pin_hash)) {
             // DURESS PIN: User is under threat
             $isDuressPin = true;
+            
+            // Save current location if provided by app
+            if ($request->filled('latitude') && $request->filled('longitude')) {
+                LocationHistory::create([
+                    'trip_id' => $trip->id,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'battery_level' => $request->battery_level,
+                    'timestamp' => now(),
+                ]);
+            }
             
             // Update trip status to duress_ended (SILENTLY)
             $trip->update([

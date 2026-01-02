@@ -155,57 +155,57 @@ class NotificationService
      */
     private function buildAlertMessage(string $alertType, array $data): string
     {
-        $userName = $data['user_name'] ?? 'User';
-        $location = $data['maps_link'] ?? 'Location unavailable';
-        $battery = $data['battery_level'] ?? 'Unknown';
-        $startTime = $data['start_time'] ?? 'Unknown';
+        $userName = $data['user_name'] ?? 'Người dùng';
+        $location = $data['maps_link'] ?? 'Vị trí không xác định';
+        $battery = $data['battery_level'] ?? 'Không rõ';
+        $startTime = $data['start_time'] ?? 'Không rõ';
 
         switch ($alertType) {
             case 'duress':
-                return "🚨 EMERGENCY ALERT 🚨\n\n"
-                    . "{$userName} has activated their DURESS signal!\n\n"
-                    . "This means they are in danger and may be under threat.\n\n"
-                    . "Trip started: {$startTime}\n"
-                    . "Destination: " . ($data['destination'] ?? 'Not specified') . "\n\n"
-                    . "📍 Last known location:\n{$location}\n\n"
-                    . "🔋 Battery level: {$battery}%\n\n"
-                    . "⚠️ IMMEDIATE ACTION REQUIRED:\n"
-                    . "1. Try to contact {$userName} immediately\n"
-                    . "2. If no response, contact local authorities (113)\n"
-                    . "3. Provide them with the location link above\n\n"
-                    . "SafeTrek - Personal Safety App";
+                return "🚨 CẢNH BÁO KHẨN CẤP 🚨\n\n"
+                    . "{$userName} đã kích hoạt tín hiệu BỊ ÉP BUỘC!\n\n"
+                    . "Điều này có nghĩa họ đang gặp nguy hiểm và có thể đang bị đe dọa.\n\n"
+                    . "Bắt đầu chuyến đi: {$startTime}\n"
+                    . "Điểm đến: " . ($data['destination'] ?? 'Không xác định') . "\n\n"
+                    . "📍 Vị trí cuối cùng:\n{$location}\n\n"
+                    . "🔋 Mức pin: {$battery}%\n\n"
+                    . "⚠️ CẦN HÀNH ĐỘNG NGAY LẬP TỨC:\n"
+                    . "1. Liên hệ với {$userName} NGAY\n"
+                    . "2. Nếu không liên lạc được, gọi cơ quan chức năng (113)\n"
+                    . "3. Cung cấp cho họ link vị trí ở trên\n\n"
+                    . "SafeTrek - Ứng dụng An toàn Cá nhân";
 
             case 'panic':
-                return "🚨 PANIC ALERT 🚨\n\n"
-                    . "{$userName} has pressed the PANIC BUTTON!\n\n"
-                    . "This is an immediate emergency!\n\n"
-                    . "📍 Current location:\n{$location}\n\n"
-                    . "🔋 Battery level: {$battery}%\n\n"
-                    . "⚠️ IMMEDIATE ACTION REQUIRED:\n"
-                    . "1. Try to contact {$userName} NOW\n"
-                    . "2. Contact local authorities (113) immediately\n"
-                    . "3. Provide them with the location link above\n\n"
-                    . "SafeTrek - Personal Safety App";
+                return "🚨 CẢNH BÁO HOẢNG LOẠN 🚨\n\n"
+                    . "{$userName} đã nhấn NÚT HOẢNG LOẠN!\n\n"
+                    . "Đây là tình huống khẩn cấp ngay lập tức!\n\n"
+                    . "📍 Vị trí hiện tại:\n{$location}\n\n"
+                    . "🔋 Mức pin: {$battery}%\n\n"
+                    . "⚠️ CẦN HÀNH ĐỘNG NGAY LẬP TỨC:\n"
+                    . "1. Liên hệ với {$userName} NGAY BÂY GIỜ\n"
+                    . "2. Gọi cơ quan chức năng (113) ngay lập tức\n"
+                    . "3. Cung cấp cho họ link vị trí ở trên\n\n"
+                    . "SafeTrek - Ứng dụng An toàn Cá nhân";
 
             case 'timer_expired':
-                return "⚠️ SAFETY CHECK-IN MISSED ⚠️\n\n"
-                    . "{$userName} started a safety trip and has NOT checked in as safe.\n\n"
-                    . "Trip started: {$startTime}\n"
-                    . "Expected end: " . ($data['expected_end_time'] ?? 'Unknown') . "\n"
-                    . "Destination: " . ($data['destination'] ?? 'Not specified') . "\n\n"
-                    . "📍 Last known location:\n{$location}\n\n"
-                    . "🔋 Battery level: {$battery}%\n\n"
-                    . "⚠️ ACTION REQUIRED:\n"
-                    . "1. Try to contact {$userName}\n"
-                    . "2. If no response after multiple attempts, contact authorities\n"
-                    . "3. This could be a phone issue, but please verify their safety\n\n"
-                    . "SafeTrek - Personal Safety App";
+                return "⚠️ KHÔNG NHẬN ĐƯỢC XÁC NHẬN AN TOÀN ⚠️\n\n"
+                    . "{$userName} đã bắt đầu chuyến đi an toàn nhưng CHƯA xác nhận an toàn.\n\n"
+                    . "Bắt đầu chuyến đi: {$startTime}\n"
+                    . "Dự kiến kết thúc: " . ($data['expected_end_time'] ?? 'Không rõ') . "\n"
+                    . "Điểm đến: " . ($data['destination'] ?? 'Không xác định') . "\n\n"
+                    . "📍 Vị trí cuối cùng:\n{$location}\n\n"
+                    . "🔋 Mức pin: {$battery}%\n\n"
+                    . "⚠️ HÀNH ĐỘNG CẦN THIẾT:\n"
+                    . "1. Cố gắng liên hệ với {$userName}\n"
+                    . "2. Nếu không liên lạc được sau nhiều lần thử, liên hệ cơ quan chức năng\n"
+                    . "3. Có thể do sự cố điện thoại, nhưng vui lòng kiểm tra an toàn của họ\n\n"
+                    . "SafeTrek - Ứng dụng An toàn Cá nhân";
 
             default:
-                return "🚨 EMERGENCY ALERT from SafeTrek\n\n"
-                    . "{$userName} needs help!\n"
-                    . "Location: {$location}\n"
-                    . "Please check on them immediately.";
+                return "🚨 CẢNH BÁO KHẨN CẤP từ SafeTrek\n\n"
+                    . "{$userName} cần giúp đỡ!\n"
+                    . "Vị trí: {$location}\n"
+                    . "Vui lòng kiểm tra họ ngay lập tức.";
         }
     }
 }

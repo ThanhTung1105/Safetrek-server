@@ -34,9 +34,9 @@ Route::middleware(['auth'])->group(function () {
         
         // Chi tiết người dùng (Hiển thị user_information.php)
         Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+        
+        // Chi tiết chuyến đi (Hiển thị trip_detail.blade.php)
+        Route::get('/trips/{id}', [TripController::class, 'show'])->name('trips.show');
 
-        // Các quản lý khác
-        Route::resource('trips', TripController::class)->only(['index', 'show']);
-        Route::resource('posts', PostController::class);
     });
 });

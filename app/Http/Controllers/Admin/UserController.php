@@ -3,63 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function show($id)
     {
-        //
-    }
+        // 1. Lấy thông tin user cùng với các mối quan hệ từ DB
+        // Sử dụng with() để tối ưu hóa truy vấn (Eager Loading)
+        $user = User::with(['guardians', 'trips' => function($query) {
+            $query->orderBy('created_at', 'desc'); // Sắp xếp chuyến đi mới nhất lên đầu
+        }])->findOrFail($id);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        // 2. Lấy danh sách người bảo vệ thực tế
+        $guardians = $user->guardians;
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // 3. Lấy danh sách chuyến đi thực tế
+        $trips = $user->trips;
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('user_information', compact('user', 'guardians', 'trips'));
     }
 }

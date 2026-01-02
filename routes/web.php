@@ -4,34 +4,39 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AuthController;
 use Illuminate\Support\Facades\Route;
+
+// Trang login phải nằm ngoài middleware 'auth' để có thể truy cập được
+Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.submit');
+Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (Admin Dashboard)
+| Protected Routes (Bắt buộc đăng nhập mới được vào)
 |--------------------------------------------------------------------------
-|
-| These routes return Blade views for the web admin dashboard.
-| TODO: Add authentication middleware for admin routes.
-|
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::middleware(['auth'])->group(function () {
+    
+    // 1. Điều hướng gốc: Nếu vào '/', bắt buộc check auth rồi mới cho sang dashboard
+    Route::get('/', function () {
+        return redirect()->route('admin.dashboard');
+    });
 
-// Admin routes (TODO: Add 'auth' and 'role:admin' middleware)
-Route::prefix('admin')->name('admin.')->group(function () {
-    
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    // User Management
-    Route::resource('users', UserController::class);
-    
-    // Trip Monitoring (View trip history, maps, etc.)
-    Route::resource('trips', TripController::class)->only(['index', 'show']);
-    
-    // Content Management (News, Safety Tips)
-    Route::resource('posts', PostController::class);
+    // 2. Nhóm Admin Dashboard
+    Route::prefix('admin')->name('admin.')->group(function () {
+        
+        // Trang chủ quản trị (Hiển thị Dashboard_admin.php)
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Chi tiết người dùng (Hiển thị user_information.php)
+        Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+
+        // Các quản lý khác
+        Route::resource('trips', TripController::class)->only(['index', 'show']);
+        Route::resource('posts', PostController::class);
+    });
 });

@@ -94,7 +94,7 @@ class TripController extends Controller
         // Create a panic trip immediately
         $trip = Trip::create([
             'user_id' => $user->id,
-            'destination_name' => 'PANIC BUTTON ACTIVATED',
+            'destination_name' => '🚨 Cảnh báo khẩn cấp (Từ trang chủ)',
             'start_time' => now(),
             'expected_end_time' => now()->addHour(), // 1 hour window
             'status' => 'panic',

@@ -24,7 +24,7 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'phone_number' => ['The provided credentials are incorrect.'],
+                'phone_number' => ['Tài khoản hoặc mật khẩu không đúng.'],
             ]);
         }
 
@@ -33,7 +33,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Login successful',
+            'message' => 'Đăng nhập thành công',
             'data' => [
                 'user' => $user,
                 'token' => $token,
@@ -65,7 +65,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Registration successful',
+            'message' => 'Đăng ký thành công',
             'data' => [
                 'user' => $user,
                 'token' => $token,
@@ -93,7 +93,7 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'PINs setup successful',
+            'message' => 'Thiết lập PIN thành công',
         ]);
     }
 

@@ -230,4 +230,35 @@ class AuthController extends Controller
             'message' => 'FCM token updated',
         ]);
     }
+
+    /**
+     * Change password (requires current password verification)
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        // Verify current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mật khẩu hiện tại không đúng',
+            ], 401);
+        }
+
+        // Update to new password
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đổi mật khẩu thành công',
+        ]);
+    }
 }

@@ -22,7 +22,7 @@
     <div class="max-w-7xl mx-auto">
         <!-- Back Button -->
         <a href="{{ route('admin.users.show', $trip->user_id) }}" class="flex items-center text-gray-500 mb-6 hover:text-blue-600 transition">
-            <i class="fas fa-arrow-left mr-2"></i> Quay lại thông tin user
+            <i class="fas fa-arrow-left mr-2"></i> Quay lại thông tin người dùng
         </a>
 
         <!-- Trip Header -->
@@ -68,7 +68,7 @@
                         </p>
                     @endif
                     
-                    <p class="text-gray-500 text-sm mb-4">Trip ID: #{{ $trip->id }}</p>
+                    <p class="text-gray-500 text-sm mb-4">Thứ tự chuyến đi: #{{ $trip->id }}</p>
                     
                     <div class="flex gap-4 text-sm">
                         <div class="flex items-center gap-2">

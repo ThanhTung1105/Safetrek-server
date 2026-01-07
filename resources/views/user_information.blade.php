@@ -119,11 +119,11 @@
                                     </td>
                                     <td class="py-4 text-center">
                                         @if($trip->status == 'panic')
-                                            <span class="px-3 py-1 bg-red-500 text-white rounded-full text-[10px] font-black shadow-sm animate-pulse">PANIC!</span>
+                                            <span class="px-3 py-1 bg-red-500 text-white rounded-full text-[10px] font-black shadow-sm animate-pulse">Hoảng loạn!</span>
                                         @elseif($trip->status == 'alerted')
                                             <span class="px-3 py-1 bg-yellow-500 text-white rounded-full text-[10px] font-black shadow-sm">HẾT GIỜ</span>
                                         @elseif($trip->status == 'duress_ended')
-                                            <span class="px-3 py-1 bg-orange-500 text-white rounded-full text-[10px] font-black shadow-sm">DURESS</span>
+                                            <span class="px-3 py-1 bg-orange-500 text-white rounded-full text-[10px] font-black shadow-sm">Cưỡng ép</span>
                                         @elseif($trip->status == 'active')
                                             <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-[10px] font-black">ĐANG ĐI</span>
                                         @else
